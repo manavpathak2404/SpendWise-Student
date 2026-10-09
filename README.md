@@ -22,7 +22,7 @@ spendwise_student/
 ├── db.py                      # MySQL connection pool & automatic table initializer
 ├── schema.sql                 # SQL schema script defining tables and constraints
 ├── requirements.txt           # Python library dependencies
-├── README.md                  # Setup documentation & Diploma Viva Voce preparation guide
+├── README.md                  # Setup documentation
 │
 ├── static/
 │   ├── css/
