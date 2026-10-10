@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if is_edit else 'Add' }} Transaction | SpendWise Student{% endblock %}
+{% block content %}
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7">
+      <div class="card shadow p-4">
+        <h2 class="mb-4">{{ 'Edit' if is_edit else 'Add' }} Transaction</h2>
+
+```
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Transaction Type</label>
+        <select name="transaction_type" class="form-select" required>
+          <option value="income" {% if values.get('transaction_type', transaction.transaction_type if is_edit else '') == 'income' %}selected{% endif %}>Income</option>
+          <option value="expense" {% if values.get('transaction_type', transaction.transaction_type if is_edit else 'expense') == 'expense' %}selected{% endif %}>Expense</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Amount (₹)</label>
+        <input type="number" name="amount" class="form-control" step="0.01" min="0.01" value="{{ values.get('amount', transaction.amount if is_edit else '') }}" required>
+        {% if errors.get('amount') %}<div class="text-danger">{{ errors.get('amount') }}</div>{% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Category</label>
+        <input type="text" name="category" class="form-control" value="{{ values.get('category', transaction.category if is_edit else '') }}" required>
+        {% if errors.get('category') %}<div class="text-danger">{{ errors.get('category') }}</div>{% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <input type="text" name="description" class="form-control" value="{{ values.get('description', transaction.description if is_edit else '') }}">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Date</label>
+        <input type="date" name="date" class="form-control" value="{{ values.get('date', transaction.date if is_edit else today) }}" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">{{ 'Update' if is_edit else 'Save' }} Transaction</button>
+      <a href="{{ url_for('transactions') }}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+    </form>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+{% endblock %}
