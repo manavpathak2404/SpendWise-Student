@@ -1,0 +1,65 @@
+```html
+{% extends "base.html" %}
+{% block title %}Dashboard | SpendWise Student{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">My Dashboard</h2>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h5>Total Balance</h5>
+                <h3>₹{{ "%.2f"|format(total_balance) }}</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h5>Total Income</h5>
+                <h3 class="text-success">₹{{ "%.2f"|format(total_income) }}</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <h5>Total Expenses</h5>
+                <h3 class="text-danger">₹{{ "%.2f"|format(total_expense) }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 mb-4">
+        <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">+ Add Transaction</a>
+        <a href="{{ url_for('transactions') }}" class="btn btn-outline-primary">View Transactions</a>
+    </div>
+
+    <div class="card shadow-sm p-3">
+        <h4>Recent Transactions</h4>
+        {% if recent_transactions %}
+        <div class="table-responsive">
+            <table class="table table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in recent_transactions %}
+                    <tr>
+                        <td>{{ t.title }}</td>
+                        <td>{{ t.type }}</td>
+                        <td>₹{{ "%.2f"|format(t.amount) }}</td>
+                        <td>{{ t.date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mt-3">No transactions yet. Add your first transaction!</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+```
