@@ -1,10 +1,11 @@
-```html
 {% extends "base.html" %}
 {% block title %}Dashboard | SpendWise Student{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <h2 class="mb-4">My Dashboard</h2>
 
+    <!-- Summary Cards -->
     <div class="row g-3 mb-4">
         <div class="col-md-4">
             <div class="card shadow-sm p-3">
@@ -12,27 +13,60 @@
                 <h3>₹{{ "%.2f"|format(total_balance) }}</h3>
             </div>
         </div>
+
         <div class="col-md-4">
             <div class="card shadow-sm p-3">
                 <h5>Total Income</h5>
-                <h3 class="text-success">₹{{ "%.2f"|format(total_income) }}</h3>
+                <h3 class="text-success">
+                    ₹{{ "%.2f"|format(total_income) }}
+                </h3>
             </div>
         </div>
+
         <div class="col-md-4">
             <div class="card shadow-sm p-3">
                 <h5>Total Expenses</h5>
-                <h3 class="text-danger">₹{{ "%.2f"|format(total_expense) }}</h3>
+                <h3 class="text-danger">
+                    ₹{{ "%.2f"|format(total_expense) }}
+                </h3>
             </div>
         </div>
     </div>
 
-    <div class="d-flex gap-2 mb-4">
-        <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">+ Add Transaction</a>
-        <a href="{{ url_for('all_transactions') }}" class="btn btn-outline-primary">View Transactions</a>
+    <!-- Action Buttons -->
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        <a href="{{ url_for('add_transaction') }}"
+           class="btn btn-primary">
+            + Add Transaction
+        </a>
+
+        <a href="{{ url_for('all_transactions') }}"
+           class="btn btn-outline-primary">
+            View Transactions
+        </a>
     </div>
 
+    <!-- Charts -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm p-3">
+                <h4>Income vs Expenses</h4>
+                <canvas id="incomeExpenseChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm p-3">
+                <h4>Expenses by Category</h4>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
     <div class="card shadow-sm p-3">
         <h4>Recent Transactions</h4>
+
         {% if recent_transactions %}
         <div class="table-responsive">
             <table class="table table-striped mt-3">
@@ -44,6 +78,7 @@
                         <th>Date</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     {% for t in recent_transactions %}
                     <tr>
@@ -57,9 +92,86 @@
             </table>
         </div>
         {% else %}
-        <p class="text-muted mt-3">No transactions yet. Add your first transaction!</p>
+        <p class="text-muted mt-3">
+            No transactions yet. Add your first transaction!
+        </p>
         {% endif %}
     </div>
 </div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+fetch("/api/chart-data")
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Chart data request failed");
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Income vs Expenses Chart
+        new Chart(document.getElementById("incomeExpenseChart"), {
+            type: "bar",
+            data: {
+                labels: data.monthly.labels,
+                datasets: [
+                    {
+                        label: "Income (₹)",
+                        data: data.monthly.income,
+                        backgroundColor: "#198754"
+                    },
+                    {
+                        label: "Expenses (₹)",
+                        data: data.monthly.expense,
+                        backgroundColor: "#dc3545"
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Amount (₹)"
+                        }
+                    }
+                }
+            }
+        });
+
+        // Expenses by Category Chart
+        new Chart(document.getElementById("categoryChart"), {
+            type: "doughnut",
+            data: {
+                labels: data.categories.labels,
+                datasets: [
+                    {
+                        label: "Expenses (₹)",
+                        data: data.categories.data,
+                        backgroundColor: [
+                            "#0d6efd",
+                            "#198754",
+                            "#ffc107",
+                            "#dc3545",
+                            "#6f42c1",
+                            "#fd7e14",
+                            "#20c997",
+                            "#6c757d"
+                        ]
+                    }
+                ]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    })
+    .catch(error => {
+        console.error("Chart loading error:", error);
+    });
+</script>
 {% endblock %}
-```
