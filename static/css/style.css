@@ -1,4 +1,254 @@
-/* SpendWise Student Styles */
+/* ================================
+   SpendWise Student - Main Styles
+================================ */
+
+:root {
+    --sw-primary: #6258df;
+    --sw-primary-dark: #5046c7;
+    --sw-background: #f7f8fc;
+    --sw-card: #ffffff;
+    --sw-text: #202b40;
+    --sw-muted: #7c879a;
+    --sw-border: #e8edf4;
+    --sw-green: #16875e;
+    --sw-red: #d7475d;
+}
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 Arial, sans-serif;
+    background: var(--sw-background);
+    color: var(--sw-text);
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* Navbar */
+
+.navbar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--sw-border);
+    padding: 15px 0;
+    box-shadow: 0 3px 15px rgba(25, 42, 70, 0.035);
+}
+
+.navbar .container {
+    max-width: 1400px;
+}
+
+.navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--sw-text) !important;
+    font-size: 20px;
+    font-weight: 750;
+    letter-spacing: -0.5px;
+}
+
+.brand-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--sw-primary);
+    color: #ffffff;
+    font-size: 22px;
+    box-shadow: 0 4px 10px rgba(98, 88, 223, 0.2);
+}
+
+.navbar .nav-link {
+    color: #69758a;
+    font-weight: 550;
+    padding: 10px 14px !important;
+    border-radius: 9px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.navbar .nav-link:hover {
+    color: var(--sw-primary);
+    background: #f3f1ff;
+}
+
+.navbar .nav-link.active {
+    color: var(--sw-primary) !important;
+    background: #f0eeff;
+}
+
+/* Buttons */
+
+.btn-primary {
+    background: var(--sw-primary);
+    border-color: var(--sw-primary);
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 9px 15px;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background: var(--sw-primary-dark);
+    border-color: var(--sw-primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--sw-primary);
+    border-color: var(--sw-primary);
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background: var(--sw-primary);
+    border-color: var(--sw-primary);
+}
+
+.btn-light {
+    border-radius: 10px;
+}
+
+/* Inputs */
+
+.form-control,
+.form-select {
+    border: 1px solid #dfe4ed;
+    border-radius: 10px;
+    padding: 11px 13px;
+    color: var(--sw-text);
+    background-color: #ffffff;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--sw-primary);
+    box-shadow: 0 0 0 3px rgba(98, 88, 223, 0.12);
+}
+
+/* Cards */
+
+.card {
+    border: 1px solid var(--sw-border);
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(25, 42, 70, 0.045);
+    background: var(--sw-card);
+}
+
+.card-header {
+    background: #ffffff;
+    border-bottom: 1px solid var(--sw-border);
+    padding: 18px 22px;
+    font-weight: 700;
+}
+
+.card-body {
+    padding: 22px;
+}
+
+/* Tables */
+
+.table {
+    vertical-align: middle;
+}
+
+.table thead th {
+    background: #f8f9fc;
+    color: #778297;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--sw-border);
+    padding: 14px;
+}
+
+.table tbody td {
+    padding: 14px;
+    color: #354056;
+    border-bottom-color: #f0f2f6;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+/* Alerts */
+
+.alert {
+    border: 0;
+    border-radius: 12px;
+    padding: 14px 17px;
+}
+
+/* Dropdown */
+
+.dropdown-menu {
+    border: 1px solid var(--sw-border);
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 10px 30px rgba(25, 42, 70, 0.10);
+}
+
+.dropdown-item {
+    border-radius: 7px;
+    padding: 9px 12px;
+}
+
+/* Footer */
+
+footer {
+    margin-top: 35px;
+    padding: 23px 0;
+    background: #ffffff;
+    border-top: 1px solid var(--sw-border);
+}
+
+footer p {
+    color: var(--sw-muted) !important;
+    font-size: 13px;
+}
+
+/* Links */
+
+a {
+    transition: color 0.2s ease;
+}
+
+/* Responsive */
+
+@media (max-width: 767px) {
+    .navbar {
+        padding: 10px 0;
+    }
+
+    .navbar-brand {
+        font-size: 17px;
+    }
+
+    .navbar-brand .brand-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 19px;
+    }
+
+    .navbar .navbar-collapse {
+        padding-top: 14px;
+    }
+
+    .navbar .d-flex.align-items-center.gap-3 {
+        align-items: flex-start !important;
+        flex-direction: column;
+        gap: 12px !important;
+        padding: 10px 0;
+    }
+
+    .card-body {
+        padding: 16px;
+    }
+
+    footer {
+        margin-top: 20px;
+    }
 }
