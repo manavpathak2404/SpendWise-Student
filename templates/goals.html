@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Savings Goals | SpendWise Student{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase small fw-semibold text-primary mb-1">Save for what matters</p>
+            <h1 class="h2 fw-bold mb-1">Savings goals</h1>
+            <p class="text-muted mb-0">Create a goal, add savings, and track your progress over time.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold mb-3"><i class="bi bi-bullseye text-primary me-2"></i>Create a goal</h2>
+                    <form method="POST" action="{{ url_for('goals') }}">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Goal name</label>
+                            <input type="text" class="form-control" id="title" name="title"
+                                   maxlength="100" placeholder="e.g. New laptop" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="target_amount" class="form-label">Target amount (₹)</label>
+                            <input type="number" class="form-control" id="target_amount" name="target_amount"
+                                   min="0.01" step="0.01" placeholder="e.g. 50000" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="saved_amount" class="form-label">Already saved (₹)</label>
+                            <input type="number" class="form-control" id="saved_amount" name="saved_amount"
+                                   min="0" step="0.01" value="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="target_date" class="form-label">Target date (optional)</label>
+                            <input type="date" class="form-control" id="target_date" name="target_date">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle me-1"></i> Create goal
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold mb-3">Your goals</h2>
+
+                    {% if goals %}
+                        {% for goal in goals %}
+                        <div class="border rounded-3 p-3 p-md-4 mb-3">
+                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                                <div>
+                                    <h3 class="h6 fw-bold mb-1">{{ goal.title }}</h3>
+                                    <p class="small text-muted mb-0">
+                                        {% if goal.target_date %}
+                                            Target date: {{ goal.target_date }}
+                                        {% else %}
+                                            No target date set
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <span class="badge {% if goal.percent >= 100 %}text-bg-success{% else %}text-bg-primary{% endif %}">
+                                    {{ goal.percent }}% saved
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between small mb-2">
+                                <span>Saved: <strong>{{ goal.saved_amount|currency }}</strong></span>
+                                <span>Target: <strong>{{ goal.target_amount|currency }}</strong></span>
+                            </div>
+                            <div class="progress mb-3" role="progressbar"
+                                 aria-label="{{ goal.title }} savings progress"
+                                 aria-valuenow="{{ goal.percent }}" aria-valuemin="0" aria-valuemax="100"
+                                 style="height: 10px;">
+                                <div class="progress-bar {% if goal.percent >= 100 %}bg-success{% else %}bg-primary{% endif %}"
+                                     style="width: {{ [goal.percent, 100]|min }}%;"></div>
+                            </div>
+
+                            {% if goal.percent >= 100 %}
+                            <p class="small text-success fw-semibold mb-3"><i class="bi bi-check-circle me-1"></i>Goal achieved!</p>
+                            {% else %}
+                            <p class="small text-muted mb-3">Still needed: {{ goal.remaining|currency }}</p>
+                            {% endif %}
+
+                            <div class="row g-2 align-items-end">
+                                <div class="col-12 col-md-7">
+                                    <form method="POST" action="{{ url_for('update_goal', goal_id=goal.id) }}">
+                                        <label for="saved-{{ goal.id }}" class="form-label small">Update total saved (₹)</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="saved-{{ goal.id }}"
+                                                   name="saved_amount" min="0" step="0.01"
+                                                   value="{{ goal.saved_amount }}" required>
+                                            <button type="submit" class="btn btn-outline-primary">Update</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-12 col-md-5 text-md-end">
+                                    <form method="POST" action="{{ url_for('delete_goal', goal_id=goal.id) }}"
+                                          onsubmit="return confirm('Delete this savings goal? This cannot be undone.');">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash me-1"></i> Delete goal
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="display-5 text-muted mb-3"><i class="bi bi-stars"></i></div>
+                            <h3 class="h5 fw-bold">No savings goals yet</h3>
+                            <p class="text-muted mb-0">Create a goal to start tracking your savings.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
