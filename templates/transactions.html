@@ -1,51 +1,174 @@
-```html
 {% extends "base.html" %}
 
 {% block title %}Transactions | SpendWise Student{% endblock %}
 
 {% block content %}
 <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Transaction History</h2>
-        <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
-            + Add Transaction
-        </a>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase small fw-semibold text-primary mb-1">Your money activity</p>
+            <h1 class="h2 fw-bold mb-1">Transactions</h1>
+            <p class="text-muted mb-0">Search, filter, and manage your income and expenses.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('export_transactions', type=current_filters.type, category=current_filters.category, search=current_filters.search, start_date=current_filters.start_date, end_date=current_filters.end_date) }}"
+               class="btn btn-outline-success">
+                <i class="bi bi-download me-1"></i> Export CSV
+            </a>
+            <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Add transaction
+            </a>
+        </div>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-            {% if transactions %}
-            <div class="table-responsive">
-                <table class="table table-striped align-middle">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Title</th>
-                            <th>Category</th>
-                            <th>Type</th>
-                            <th>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for transaction in transactions %}
-                        <tr>
-                            <td>{{ transaction.date }}</td>
-                            <td>{{ transaction.title }}</td>
-                            <td>{{ transaction.category }}</td>
-                            <td>{{ transaction.type }}</td>
-                            <td>₹{{ transaction.amount }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <p class="text-center text-muted py-4">
-                No transactions found. Add your first transaction!
-            </p>
-            {% endif %}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3 p-md-4">
+            <form method="GET" action="{{ url_for('all_transactions') }}">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <label for="search" class="form-label">Search</label>
+                        <input type="search" class="form-control" id="search" name="search"
+                               value="{{ current_filters.search }}" placeholder="Search title or category">
+                    </div>
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <label for="type" class="form-label">Type</label>
+                        <select class="form-select" id="type" name="type">
+                            <option value="">All types</option>
+                            <option value="income" {% if current_filters.type == 'income' %}selected{% endif %}>Income</option>
+                            <option value="expense" {% if current_filters.type == 'expense' %}selected{% endif %}>Expense</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="">All categories</option>
+                            {% for category in income_categories %}
+                            <option value="{{ category }}" {% if current_filters.category == category %}selected{% endif %}>{{ category }}</option>
+                            {% endfor %}
+                            {% for category in expense_categories %}
+                            <option value="{{ category }}" {% if current_filters.category == category %}selected{% endif %}>{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <label for="start_date" class="form-label">From date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date"
+                               value="{{ current_filters.start_date }}">
+                    </div>
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <label for="end_date" class="form-label">To date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date"
+                               value="{{ current_filters.end_date }}">
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label for="sort" class="form-label">Sort by</label>
+                        <select class="form-select" id="sort" name="sort">
+                            <option value="newest" {% if current_filters.sort == 'newest' %}selected{% endif %}>Newest first</option>
+                            <option value="oldest" {% if current_filters.sort == 'oldest' %}selected{% endif %}>Oldest first</option>
+                            <option value="amount_high" {% if current_filters.sort == 'amount_high' %}selected{% endif %}>Amount: high to low</option>
+                            <option value="amount_low" {% if current_filters.sort == 'amount_low' %}selected{% endif %}>Amount: low to high</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-9 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-funnel me-1"></i> Apply filters
+                        </button>
+                        <a href="{{ url_for('all_transactions') }}" class="btn btn-outline-secondary">Clear</a>
+                    </div>
+                </div>
+            </form>
         </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 fw-bold mb-0">All transactions</h2>
+        <span class="text-muted small">{{ total_count }} result{% if total_count != 1 %}s{% endif %}</span>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        {% if transactions %}
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3 ps-md-4">Transaction</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-end pe-3 pe-md-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td class="ps-3 ps-md-4">
+                            <div class="fw-semibold">{{ transaction.title }}</div>
+                            <span class="badge rounded-pill {% if transaction.type == 'income' %}text-bg-success{% else %}text-bg-danger{% endif %}">
+                                {{ transaction.type|title }}
+                            </span>
+                        </td>
+                        <td>{{ transaction.category }}</td>
+                        <td class="text-muted">{{ transaction.date }}</td>
+                        <td class="text-end fw-semibold {% if transaction.type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                            {% if transaction.type == 'income' %}+{% else %}−{% endif %}{{ transaction.amount|currency }}
+                        </td>
+                        <td class="text-end pe-3 pe-md-4">
+                            <div class="d-inline-flex gap-1">
+                                <a href="{{ url_for('edit_transaction', transaction_id=transaction.id) }}"
+                                   class="btn btn-sm btn-outline-primary" aria-label="Edit transaction">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick='confirmDelete({{ transaction.id }}, {{ transaction.title|tojson }})'
+                                        aria-label="Delete transaction">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_pages > 1 %}
+        <div class="card-footer bg-white border-0 py-3">
+            <nav aria-label="Transaction pages">
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item {% if current_page <= 1 %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for('all_transactions', page=current_page-1, type=current_filters.type, category=current_filters.category, search=current_filters.search, start_date=current_filters.start_date, end_date=current_filters.end_date, sort=current_filters.sort) }}">
+                            Previous
+                        </a>
+                    </li>
+                    {% for page_num in range(1, total_pages + 1) %}
+                    <li class="page-item {% if page_num == current_page %}active{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for('all_transactions', page=page_num, type=current_filters.type, category=current_filters.category, search=current_filters.search, start_date=current_filters.start_date, end_date=current_filters.end_date, sort=current_filters.sort) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                    <li class="page-item {% if current_page >= total_pages %}disabled{% endif %}">
+                        <a class="page-link"
+                           href="{{ url_for('all_transactions', page=current_page+1, type=current_filters.type, category=current_filters.category, search=current_filters.search, start_date=current_filters.start_date, end_date=current_filters.end_date, sort=current_filters.sort) }}">
+                            Next
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="text-center py-5 px-3">
+            <div class="display-5 text-muted mb-3"><i class="bi bi-receipt"></i></div>
+            <h3 class="h5 fw-bold">No transactions found</h3>
+            <p class="text-muted mb-3">Try changing your filters, or add your first transaction.</p>
+            <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Add transaction
+            </a>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
-```
