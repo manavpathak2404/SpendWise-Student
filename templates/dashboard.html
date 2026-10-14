@@ -1,177 +1,698 @@
 {% extends "base.html" %}
+
 {% block title %}Dashboard | SpendWise Student{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <h2 class="mb-4">My Dashboard</h2>
+
+<style>
+    .dashboard-page {
+        max-width: 1400px;
+        margin: auto;
+        padding: 28px 16px 40px;
+    }
+
+    .dashboard-heading {
+        font-weight: 750;
+        letter-spacing: -0.8px;
+        color: #172033;
+    }
+
+    .dashboard-subtitle {
+        color: #788397;
+        font-size: 0.95rem;
+    }
+
+    .summary-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #e9edf4;
+        border-radius: 18px;
+        padding: 23px;
+        background: #ffffff;
+        height: 100%;
+        box-shadow: 0 5px 22px rgba(25, 42, 70, 0.045);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(25, 42, 70, 0.09);
+    }
+
+    .summary-label {
+        font-size: 0.9rem;
+        color: #7a8496;
+        font-weight: 600;
+        margin-bottom: 13px;
+    }
+
+    .summary-amount {
+        font-size: clamp(1.45rem, 2.5vw, 2rem);
+        font-weight: 750;
+        letter-spacing: -0.7px;
+        color: #182238;
+        overflow-wrap: anywhere;
+    }
+
+    .summary-icon {
+        width: 46px;
+        height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        font-size: 1.35rem;
+        margin-bottom: 22px;
+    }
+
+    .icon-balance {
+        color: #5b50d6;
+        background: #efedff;
+    }
+
+    .icon-income {
+        color: #138a61;
+        background: #e4f8ef;
+    }
+
+    .icon-expense {
+        color: #d64c61;
+        background: #fff0f1;
+    }
+
+    .dashboard-panel {
+        background: #ffffff;
+        border: 1px solid #e9edf4;
+        border-radius: 18px;
+        padding: 22px;
+        height: 100%;
+        box-shadow: 0 5px 22px rgba(25, 42, 70, 0.04);
+    }
+
+    .panel-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #202b40;
+        margin-bottom: 5px;
+    }
+
+    .panel-subtitle {
+        color: #8791a2;
+        font-size: 0.84rem;
+        margin-bottom: 20px;
+    }
+
+    .chart-area {
+        position: relative;
+        height: 285px;
+        width: 100%;
+    }
+
+    .transaction-table th {
+        color: #7c8799;
+        background: #f8f9fc;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.45px;
+        white-space: nowrap;
+        padding: 14px;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .transaction-table td {
+        padding: 15px 14px;
+        vertical-align: middle;
+        color: #354056;
+        border-bottom: 1px solid #f0f2f6;
+    }
+
+    .transaction-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .transaction-title {
+        font-weight: 650;
+        color: #263248;
+    }
+
+    .transaction-category {
+        color: #8993a4;
+        font-size: 0.82rem;
+        margin-top: 3px;
+    }
+
+    .type-badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .income-badge {
+        background: #e5f8ef;
+        color: #13845c;
+    }
+
+    .expense-badge {
+        background: #fff0f1;
+        color: #d7475d;
+    }
+
+    .income-amount {
+        color: #13845c;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .expense-amount {
+        color: #d7475d;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 35px 15px;
+        color: #8791a2;
+    }
+
+    .empty-icon {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+    }
+
+    .dashboard-action {
+        border-radius: 11px;
+        padding: 10px 16px;
+        font-weight: 650;
+    }
+
+    .btn-add-transaction {
+        background: #6258df;
+        color: white;
+        border: 1px solid #6258df;
+    }
+
+    .btn-add-transaction:hover {
+        background: #5046c7;
+        color: white;
+    }
+
+    .btn-view-transactions {
+        background: white;
+        color: #354056;
+        border: 1px solid #dfe4ed;
+    }
+
+    .btn-view-transactions:hover {
+        background: #f7f8fc;
+        color: #202b40;
+    }
+
+    @media (max-width: 767px) {
+        .dashboard-page {
+            padding: 20px 12px 30px;
+        }
+
+        .summary-card {
+            padding: 18px;
+        }
+
+        .dashboard-panel {
+            padding: 16px;
+        }
+
+        .chart-area {
+            height: 245px;
+        }
+
+        .dashboard-heading {
+            font-size: 1.6rem;
+        }
+    }
+</style>
+
+<div class="dashboard-page">
+
+    <!-- Dashboard Heading -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <h2 class="dashboard-heading mb-2">
+                My Dashboard
+            </h2>
+
+            <p class="dashboard-subtitle mb-0">
+                Track your money. Understand your spending. Plan smarter.
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('add_transaction') }}"
+               class="btn dashboard-action btn-add-transaction">
+                + Add Transaction
+            </a>
+
+            <a href="{{ url_for('transactions') }}"
+               class="btn dashboard-action btn-view-transactions">
+                View Transactions
+            </a>
+        </div>
+
+    </div>
 
     <!-- Summary Cards -->
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3">
-                <h5>Total Balance</h5>
-                <h3>₹{{ "%.2f"|format(total_balance) }}</h3>
+
+        <div class="col-12 col-md-4">
+            <div class="summary-card">
+                <div class="summary-icon icon-balance">₹</div>
+
+                <div class="summary-label">
+                    Total Balance
+                </div>
+
+                <div class="summary-amount">
+                    {{ total_balance|inr }}
+                </div>
+
+                <div class="dashboard-subtitle mt-2">
+                    Income minus expenses
+                </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3">
-                <h5>Total Income</h5>
-                <h3 class="text-success">
-                    ₹{{ "%.2f"|format(total_income) }}
-                </h3>
+        <div class="col-12 col-md-4">
+            <div class="summary-card">
+                <div class="summary-icon icon-income">↗</div>
+
+                <div class="summary-label">
+                    Total Income
+                </div>
+
+                <div class="summary-amount">
+                    {{ total_income|inr }}
+                </div>
+
+                <div class="dashboard-subtitle mt-2">
+                    Money received
+                </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card shadow-sm p-3">
-                <h5>Total Expenses</h5>
-                <h3 class="text-danger">
-                    ₹{{ "%.2f"|format(total_expense) }}
-                </h3>
+        <div class="col-12 col-md-4">
+            <div class="summary-card">
+                <div class="summary-icon icon-expense">↘</div>
+
+                <div class="summary-label">
+                    Total Expenses
+                </div>
+
+                <div class="summary-amount">
+                    {{ total_expense|inr }}
+                </div>
+
+                <div class="dashboard-subtitle mt-2">
+                    Money spent
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Action Buttons -->
-    <div class="d-flex gap-2 mb-4 flex-wrap">
-        <a href="{{ url_for('add_transaction') }}"
-           class="btn btn-primary">
-            + Add Transaction
-        </a>
-
-        <a href="{{ url_for('all_transactions') }}"
-           class="btn btn-outline-primary">
-            View Transactions
-        </a>
     </div>
 
     <!-- Charts -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card shadow-sm p-3">
-                <h4>Income vs Expenses</h4>
-                <canvas id="incomeExpenseChart"></canvas>
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-lg-7">
+            <div class="dashboard-panel">
+
+                <h5 class="panel-title">
+                    Income vs Expenses
+                </h5>
+
+                <p class="panel-subtitle">
+                    Your monthly financial activity
+                </p>
+
+                <div class="chart-area">
+                    <canvas id="incomeExpenseChart"></canvas>
+                </div>
+
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card shadow-sm p-3">
-                <h4>Expenses by Category</h4>
-                <canvas id="categoryChart"></canvas>
+        <div class="col-12 col-lg-5">
+            <div class="dashboard-panel">
+
+                <h5 class="panel-title">
+                    Spending Breakdown
+                </h5>
+
+                <p class="panel-subtitle">
+                    See where your money goes
+                </p>
+
+                <div class="chart-area">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+
+                <div id="categoryEmptyMessage"
+                     class="empty-state d-none">
+                    <div class="empty-icon">📊</div>
+                    <p class="mb-0">
+                        No expense data available yet.
+                    </p>
+                </div>
+
             </div>
         </div>
+
     </div>
 
     <!-- Recent Transactions -->
-    <div class="card shadow-sm p-3">
-        <h4>Recent Transactions</h4>
+    <div class="dashboard-panel">
 
-        {% if recent_transactions %}
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+
+            <div>
+                <h5 class="panel-title mb-1">
+                    Recent Transactions
+                </h5>
+
+                <p class="panel-subtitle mb-0">
+                    Your latest financial activity
+                </p>
+            </div>
+
+            <a href="{{ url_for('transactions') }}"
+               class="text-decoration-none fw-semibold">
+                View all →
+            </a>
+
+        </div>
+
         <div class="table-responsive">
-            <table class="table table-striped mt-3">
+
+            <table class="table transaction-table mb-0">
+
                 <thead>
                     <tr>
-                        <th>Title</th>
+                        <th>Transaction</th>
                         <th>Type</th>
-                        <th>Amount</th>
                         <th>Date</th>
+                        <th class="text-end">Amount</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    {% for t in recent_transactions %}
+
+                    {% for transaction in recent_transactions %}
+
                     <tr>
-                        <td>{{ t.title }}</td>
-                        <td>{{ t.type }}</td>
-                        <td>₹{{ "%.2f"|format(t.amount) }}</td>
-                        <td>{{ t.date }}</td>
+
+                        <td>
+                            <div class="transaction-title">
+                                {{ transaction.title }}
+                            </div>
+
+                            <div class="transaction-category">
+                                {{ transaction.category }}
+                            </div>
+                        </td>
+
+                        <td>
+                            {% if transaction.type == 'income' %}
+                                <span class="type-badge income-badge">
+                                    Income
+                                </span>
+                            {% else %}
+                                <span class="type-badge expense-badge">
+                                    Expense
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-nowrap">
+                            {{ transaction.date }}
+                        </td>
+
+                        <td class="text-end">
+                            {% if transaction.type == 'income' %}
+                                <span class="income-amount">
+                                    +{{ transaction.amount|inr }}
+                                </span>
+                            {% else %}
+                                <span class="expense-amount">
+                                    -{{ transaction.amount|inr }}
+                                </span>
+                            {% endif %}
+                        </td>
+
                     </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <div class="empty-icon">💳</div>
+
+                                <h6 class="fw-bold">
+                                    No transactions yet
+                                </h6>
+
+                                <p class="mb-3">
+                                    Add your first transaction to get started.
+                                </p>
+
+                                <a href="{{ url_for('add_transaction') }}"
+                                   class="btn dashboard-action btn-add-transaction">
+                                    + Add Transaction
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
                     {% endfor %}
+
                 </tbody>
+
             </table>
+
         </div>
-        {% else %}
-        <p class="text-muted mt-3">
-            No transactions yet. Add your first transaction!
-        </p>
-        {% endif %}
+
     </div>
+
 </div>
 
-<!-- Chart.js Library -->
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-fetch("/api/chart-data")
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Chart data request failed");
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Income vs Expenses Chart
-        new Chart(document.getElementById("incomeExpenseChart"), {
-            type: "bar",
-            data: {
-                labels: data.monthly.labels,
-                datasets: [
-                    {
-                        label: "Income (₹)",
-                        data: data.monthly.income,
-                        backgroundColor: "#198754"
+document.addEventListener("DOMContentLoaded", function () {
+
+    const currencyFormatter = new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 2
+    });
+
+    const chartColors = [
+        "#6258df",
+        "#22a879",
+        "#f0a33a",
+        "#e45c72",
+        "#3995db",
+        "#9a70d6",
+        "#38b9b2"
+    ];
+
+    fetch("{{ url_for('chart_data') }}")
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error("Unable to load chart data.");
+            }
+
+            return response.json();
+        })
+        .then(function (data) {
+
+            const monthly = data.monthly || {
+                labels: [],
+                income: [],
+                expense: []
+            };
+
+            const categoryData = data.categories || {
+                labels: [],
+                data: []
+            };
+
+            // Monthly Income vs Expenses
+            const incomeExpenseCanvas =
+                document.getElementById("incomeExpenseChart");
+
+            new Chart(incomeExpenseCanvas, {
+                type: "bar",
+
+                data: {
+                    labels: monthly.labels || [],
+
+                    datasets: [
+                        {
+                            label: "Income",
+                            data: monthly.income || [],
+                            backgroundColor: "#22a879",
+                            borderRadius: 6,
+                            maxBarThickness: 30
+                        },
+                        {
+                            label: "Expenses",
+                            data: monthly.expense || [],
+                            backgroundColor: "#e45c72",
+                            borderRadius: 6,
+                            maxBarThickness: 30
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    interaction: {
+                        mode: "index",
+                        intersect: false
                     },
-                    {
-                        label: "Expenses (₹)",
-                        data: data.monthly.expense,
-                        backgroundColor: "#dc3545"
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: "Amount (₹)"
+
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: {
+                                usePointStyle: true,
+                                padding: 18
+                            }
+                        },
+
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return context.dataset.label + ": " +
+                                        currencyFormatter.format(
+                                            context.parsed.y || 0
+                                        );
+                                }
+                            }
+                        }
+                    },
+
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+
+                            ticks: {
+                                color: "#8791a2"
+                            }
+                        },
+
+                        y: {
+                            beginAtZero: true,
+
+                            ticks: {
+                                color: "#8791a2",
+
+                                callback: function (value) {
+                                    return "₹" +
+                                        new Intl.NumberFormat("en-IN", {
+                                            notation: "compact",
+                                            maximumFractionDigits: 1
+                                        }).format(value);
+                                }
+                            },
+
+                            grid: {
+                                color: "#edf0f5"
+                            }
                         }
                     }
                 }
+            });
+
+            // Expense Category Breakdown
+            const categoryCanvas =
+                document.getElementById("categoryChart");
+
+            const categoryEmptyMessage =
+                document.getElementById("categoryEmptyMessage");
+
+            const hasCategoryData =
+                (categoryData.data || []).some(function (value) {
+                    return Number(value) > 0;
+                });
+
+            if (hasCategoryData) {
+
+                new Chart(categoryCanvas, {
+                    type: "doughnut",
+
+                    data: {
+                        labels: categoryData.labels,
+
+                        datasets: [{
+                            data: categoryData.data,
+
+                            backgroundColor: chartColors,
+
+                            borderColor: "#ffffff",
+                            borderWidth: 4,
+                            hoverOffset: 7
+                        }]
+                    },
+
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: "68%",
+
+                        plugins: {
+                            legend: {
+                                position: "bottom",
+
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 16
+                                }
+                            },
+
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return context.label + ": " +
+                                            currencyFormatter.format(
+                                                context.parsed || 0
+                                            );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+            } else {
+                categoryCanvas.style.display = "none";
+                categoryEmptyMessage.classList.remove("d-none");
             }
+
+        })
+        .catch(function (error) {
+            console.error("Dashboard chart error:", error);
         });
 
-        // Expenses by Category Chart
-        new Chart(document.getElementById("categoryChart"), {
-            type: "doughnut",
-            data: {
-                labels: data.categories.labels,
-                datasets: [
-                    {
-                        label: "Expenses (₹)",
-                        data: data.categories.data,
-                        backgroundColor: [
-                            "#0d6efd",
-                            "#198754",
-                            "#ffc107",
-                            "#dc3545",
-                            "#6f42c1",
-                            "#fd7e14",
-                            "#20c997",
-                            "#6c757d"
-                        ]
-                    }
-                ]
-            },
-            options: {
-                responsive: true
-            }
-        });
-    })
-    .catch(error => {
-        console.error("Chart loading error:", error);
-    });
+});
 </script>
+
 {% endblock %}
