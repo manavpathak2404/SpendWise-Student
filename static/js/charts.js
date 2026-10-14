@@ -1,186 +1,225 @@
-/**
- * SpendWise Student - Chart.js Visualizations
- * Renders:
- * 1. Expense Breakdown Doughnut Chart
- * 2. Income vs Expenses 6-Month Bar Chart
- */
+/* SpendWise Student - Dashboard Charts */
 
-document.addEventListener('DOMContentLoaded', () => {
-    initDashboardCharts();
-});
+(() => {
+    "use strict";
 
-async function initDashboardCharts() {
-    const categoryCanvas = document.getElementById('categoryChart');
-    const monthlyCanvas = document.getElementById('monthlyChart');
+    const formatMoney = (value) => {
+        return new Intl.NumberFormat("en-IN", {
+            style: "currency",
+            currency: "INR",
+            maximumFractionDigits: 0
+        }).format(Number(value) || 0);
+    };
 
-    if (!categoryCanvas || !monthlyCanvas) return;
+    const showMessage = (canvas, message) => {
+        if (!canvas) return;
 
-    try {
-        const response = await fetch('/api/chart-data');
-        if (!response.ok) {
-            console.error('Failed to load chart data');
+        const parent = canvas.parentElement;
+
+        if (parent) {
+            parent.innerHTML = `
+                <div class="text-center text-muted p-4">
+                    ${message}
+                </div>
+            `;
+        }
+    };
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const incomeExpenseCanvas =
+            document.getElementById("incomeExpenseChart");
+
+        const categoryCanvas =
+            document.getElementById("categoryChart");
+
+        if (!incomeExpenseCanvas && !categoryCanvas) return;
+
+        if (typeof Chart === "undefined") {
+            showMessage(
+                incomeExpenseCanvas,
+                "Charts could not load. Please refresh the page."
+            );
+
+            showMessage(
+                categoryCanvas,
+                "Charts could not load. Please refresh the page."
+            );
+
             return;
         }
 
-        const data = await response.json();
-
-        // 1. Render Category Doughnut Chart
-        renderCategoryDoughnut(categoryCanvas, data.categories);
-
-        // 2. Render Monthly Comparison Bar Chart
-        renderMonthlyBarChart(monthlyCanvas, data.monthly);
-
-    } catch (err) {
-        console.error('Error fetching or initializing charts:', err);
-    }
-}
-
-/**
- * Renders Doughnut chart of expenses by category
- */
-function renderCategoryDoughnut(canvas, categoryData) {
-    const emptyMsg = document.getElementById('noExpenseChartData');
-    
-    if (!categoryData || !categoryData.labels || categoryData.labels.length === 0) {
-        canvas.style.display = 'none';
-        if (emptyMsg) emptyMsg.classList.remove('d-none');
-        return;
-    }
-
-    if (emptyMsg) emptyMsg.classList.add('d-none');
-    canvas.style.display = 'block';
-
-    const colorPalette = [
-        '#4f46e5', '#06b6d4', '#10b981', '#f59e0b', 
-        '#ef4444', '#8b5cf6', '#ec4899', '#64748b'
-    ];
-
-    new Chart(canvas, {
-        type: 'doughnut',
-        data: {
-            labels: categoryData.labels,
-            datasets: [{
-                data: categoryData.data,
-                backgroundColor: colorPalette.slice(0, categoryData.labels.length),
-                hoverOffset: 6,
-                borderWidth: 2,
-                borderColor: '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 12,
-                        padding: 14,
-                        font: { size: 12 }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            const label = context.label || '';
-                            const value = context.parsed;
-                            const formatted = typeof formatINR === 'function' ? formatINR(value) : `₹${value.toFixed(2)}`;
-                            return ` ${label}: ${formatted}`;
-                        }
-                    }
+        try {
+            const response = await fetch("/chart-data", {
+                headers: {
+                    Accept: "application/json"
                 }
-            },
-            cutout: '65%'
-        }
-    });
-}
+            });
 
-/**
- * Renders Bar Chart of Income vs Expenses for the last 6 months
- */
-function renderMonthlyBarChart(canvas, monthlyData) {
-    const emptyMsg = document.getElementById('noMonthlyChartData');
+            if (!response.ok) {
+                throw new Error("Failed to load chart data.");
+            }
 
-    const hasData = monthlyData && monthlyData.labels && monthlyData.labels.length > 0 &&
-        (monthlyData.income.some(v => v > 0) || monthlyData.expense.some(v => v > 0));
+            const data = await response.json();
 
-    if (!hasData) {
-        canvas.style.display = 'none';
-        if (emptyMsg) emptyMsg.classList.remove('d-none');
-        return;
-    }
+            /* Income and Expenses Chart */
 
-    if (emptyMsg) emptyMsg.classList.add('d-none');
-    canvas.style.display = 'block';
+            if (incomeExpenseCanvas) {
+                const monthly = Array.isArray(data.monthly)
+                    ? data.monthly
+                    : [];
 
-    new Chart(canvas, {
-        type: 'bar',
-        data: {
-            labels: monthlyData.labels,
-            datasets: [
-                {
-                    label: 'Income',
-                    data: monthlyData.income,
-                    backgroundColor: '#10b981',
-                    borderRadius: 4,
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.7
-                },
-                {
-                    label: 'Expense',
-                    data: monthlyData.expense,
-                    backgroundColor: '#ef4444',
-                    borderRadius: 4,
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.7
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function (value) {
-                            return '₹' + (value >= 1000 ? (value / 1000) + 'k' : value);
+                if (monthly.length === 0) {
+                    showMessage(
+                        incomeExpenseCanvas,
+                        "Add transactions to see your income and expenses."
+                    );
+                } else {
+                    new Chart(incomeExpenseCanvas, {
+                        type: "line",
+
+                        data: {
+                            labels: monthly.map(item => item.month),
+
+                            datasets: [
+                                {
+                                    label: "Income",
+                                    data: monthly.map(
+                                        item => Number(item.income) || 0
+                                    ),
+                                    borderColor: "#16a34a",
+                                    backgroundColor: "rgba(22,163,74,0.12)",
+                                    fill: true,
+                                    tension: 0.35,
+                                    borderWidth: 2.5
+                                },
+                                {
+                                    label: "Expenses",
+                                    data: monthly.map(
+                                        item => Number(item.expense) || 0
+                                    ),
+                                    borderColor: "#dc2626",
+                                    backgroundColor: "rgba(220,38,38,0.08)",
+                                    fill: true,
+                                    tension: 0.35,
+                                    borderWidth: 2.5
+                                }
+                            ]
                         },
-                        font: { size: 11 }
-                    },
-                    grid: {
-                        color: '#f1f5f9'
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        font: { size: 11 }
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        boxWidth: 12,
-                        padding: 12,
-                        font: { size: 12 }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            const datasetLabel = context.dataset.label || '';
-                            const value = context.parsed.y;
-                            const formatted = typeof formatINR === 'function' ? formatINR(value) : `₹${value.toFixed(2)}`;
-                            return ` ${datasetLabel}: ${formatted}`;
+
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+
+                            interaction: {
+                                mode: "index",
+                                intersect: false
+                            },
+
+                            plugins: {
+                                legend: {
+                                    position: "bottom"
+                                },
+
+                                tooltip: {
+                                    callbacks: {
+                                        label: context =>
+                                            `${context.dataset.label}: ${formatMoney(context.parsed.y)}`
+                                    }
+                                }
+                            },
+
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+
+                                    ticks: {
+                                        callback: value => formatMoney(value)
+                                    }
+                                }
+                            }
                         }
-                    }
+                    });
                 }
             }
+
+            /* Expense Categories Chart */
+
+            if (categoryCanvas) {
+                const categories = Array.isArray(data.categories)
+                    ? data.categories
+                    : [];
+
+                if (categories.length === 0) {
+                    showMessage(
+                        categoryCanvas,
+                        "Add some expenses to see your category breakdown."
+                    );
+                } else {
+                    new Chart(categoryCanvas, {
+                        type: "doughnut",
+
+                        data: {
+                            labels: categories.map(
+                                item => item.category
+                            ),
+
+                            datasets: [
+                                {
+                                    data: categories.map(
+                                        item => Number(item.total) || 0
+                                    ),
+
+                                    backgroundColor: [
+                                        "#4f46e5",
+                                        "#0ea5e9",
+                                        "#14b8a6",
+                                        "#f59e0b",
+                                        "#f97316",
+                                        "#ec4899",
+                                        "#8b5cf6",
+                                        "#64748b"
+                                    ],
+
+                                    borderWidth: 3,
+                                    borderColor: "#ffffff",
+                                    hoverOffset: 7
+                                }
+                            ]
+                        },
+
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: "63%",
+
+                            plugins: {
+                                legend: {
+                                    position: "bottom"
+                                },
+
+                                tooltip: {
+                                    callbacks: {
+                                        label: context =>
+                                            `${context.label}: ${formatMoney(context.parsed)}`
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Dashboard chart error:", error);
+
+            showMessage(
+                incomeExpenseCanvas,
+                "Unable to load chart data. Please refresh the page."
+            );
+
+            showMessage(
+                categoryCanvas,
+                "Unable to load chart data. Please refresh the page."
+            );
         }
     });
-}
+})();
