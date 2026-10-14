@@ -1,19 +1,15 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Sign Up | SpendWise Student</title>
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body {
-            background: #ffffff;
+            background: #f8fafc;
             color: #212529;
             font-family: Arial, sans-serif;
             min-height: 100vh;
@@ -22,24 +18,15 @@
         }
 
         .navbar {
-            background: #ffffff;
-            border-bottom: 1px solid #f0f0f0;
+            background: white;
+            border-bottom: 1px solid #e9ecef;
         }
 
         .brand {
             font-size: 20px;
-            font-weight: 600;
+            font-weight: 700;
             color: #212529;
             text-decoration: none;
-        }
-
-        .brand:hover {
-            color: #0d6efd;
-        }
-
-        .nav-link {
-            color: #0d6efd;
-            font-weight: 500;
         }
 
         .signup-container {
@@ -47,252 +34,134 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 45px 15px;
+            padding: 40px 15px;
         }
 
         .signup-card {
             width: 100%;
-            max-width: 625px;
-            background: #ffffff;
-            padding: 28px 25px;
-            border: 1px solid #dddddd;
-            border-radius: 8px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            max-width: 520px;
+            padding: 32px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
         }
 
         .signup-title {
             text-align: center;
-            font-size: 32px;
+            font-size: 29px;
+            font-weight: 700;
             margin-bottom: 25px;
-            font-weight: 500;
         }
 
         .form-label {
-            font-weight: 500;
-            margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .form-control {
-            min-height: 42px;
-            border-radius: 6px;
-        }
-
-        .form-control:focus {
-            border-color: #86b7fe;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+            min-height: 44px;
+            border-radius: 8px;
         }
 
         .signup-btn {
             width: 100%;
-            min-height: 42px;
-            background: #0d6efd;
+            min-height: 45px;
+            background: #2563eb;
+            color: white;
             border: none;
-            border-radius: 6px;
-            color: #ffffff;
-            font-weight: 500;
-            margin-top: 5px;
+            border-radius: 8px;
+            font-weight: 600;
         }
 
         .signup-btn:hover {
-            background: #0b5ed7;
+            background: #1d4ed8;
         }
 
         .login-text {
             text-align: center;
-            margin-top: 28px;
-            margin-bottom: 15px;
-        }
-
-        .login-text a {
-            color: #0d6efd;
+            margin-top: 22px;
         }
 
         .footer {
             text-align: center;
-            padding: 22px 12px;
-            color: #212529;
+            padding: 20px;
+            color: #64748b;
         }
 
         @media (max-width: 576px) {
-            .signup-container {
-                padding: 30px 15px;
-            }
-
             .signup-card {
                 padding: 24px 18px;
-            }
-
-            .signup-title {
-                font-size: 27px;
             }
         }
     </style>
 </head>
-
 <body>
 
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="brand" href="{{ url_for('login') }}">
-                ₹ SpendWise Student
-            </a>
+<nav class="navbar">
+    <div class="container py-3 d-flex justify-content-between align-items-center">
+        <a class="brand" href="{{ url_for('login') }}">SpendWise Student</a>
+        <a class="btn btn-outline-primary btn-sm" href="{{ url_for('login') }}">Login</a>
+    </div>
+</nav>
 
-            <div class="d-flex align-items-center gap-3">
-                <a class="nav-link" href="{{ url_for('login') }}">
-                    Login
-                </a>
+<main class="signup-container">
+    <div class="signup-card">
+        <h1 class="signup-title">Create Your Account</h1>
 
-                <a
-                    class="btn btn-outline-primary btn-sm"
-                    href="{{ url_for('signup') }}"
-                >
-                    Sign Up
-                </a>
-            </div>
-        </div>
-    </nav>
-
-    <main class="signup-container">
-        <div class="signup-card">
-
-            <h1 class="signup-title">Create Your Account</h1>
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div
-                            class="alert alert-{{ category }} alert-dismissible fade show"
-                            role="alert"
-                        >
-                            {{ message }}
-                            <button
-                                type="button"
-                                class="btn-close"
-                                data-bs-dismiss="alert"
-                                aria-label="Close"
-                            ></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            {% if errors %}
-                <div class="alert alert-danger" role="alert">
-                    Please correct the errors below.
-                </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
             {% endif %}
+        {% endwith %}
 
-            <form method="POST" action="{{ url_for('signup') }}">
+        <form method="POST" action="{{ url_for('signup') }}">
+            <div class="mb-3">
+                <label for="name" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="name" name="name"
+                       value="{{ values.get('name', '') if values else '' }}"
+                       autocomplete="name" required>
+            </div>
 
-                <div class="mb-3">
-                    <label for="name" class="form-label">
-                        Full Name
-                    </label>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email"
+                       value="{{ values.get('email', '') if values else '' }}"
+                       autocomplete="email" required>
+            </div>
 
-                    <input
-                        type="text"
-                        class="form-control {% if errors.get('name') %}is-invalid{% endif %}"
-                        id="name"
-                        name="name"
-                        value="{{ values.get('name', '') }}"
-                        maxlength="100"
-                        autocomplete="name"
-                        required
-                    >
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password"
+                       name="password" minlength="6"
+                       autocomplete="new-password" required>
+            </div>
 
-                    {% if errors.get('name') %}
-                        <div class="invalid-feedback">
-                            {{ errors.get('name') }}
-                        </div>
-                    {% endif %}
-                </div>
+            <div class="mb-3">
+                <label for="confirm_password" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confirm_password"
+                       name="confirm_password" minlength="6"
+                       autocomplete="new-password" required>
+            </div>
 
-                <div class="mb-3">
-                    <label for="email" class="form-label">
-                        Email
-                    </label>
+            <button type="submit" class="signup-btn">Create Account</button>
+        </form>
 
-                    <input
-                        type="email"
-                        class="form-control {% if errors.get('email') %}is-invalid{% endif %}"
-                        id="email"
-                        name="email"
-                        value="{{ values.get('email', '') }}"
-                        maxlength="150"
-                        autocomplete="email"
-                        required
-                    >
+        <p class="login-text">
+            Already have an account?
+            <a href="{{ url_for('login') }}">Login</a>
+        </p>
+    </div>
+</main>
 
-                    {% if errors.get('email') %}
-                        <div class="invalid-feedback">
-                            {{ errors.get('email') }}
-                        </div>
-                    {% endif %}
-                </div>
+<footer class="footer">
+    SpendWise Student — Personal Finance &amp; Budget Tracker
+</footer>
 
-                <div class="mb-3">
-                    <label for="password" class="form-label">
-                        Password
-                    </label>
-
-                    <input
-                        type="password"
-                        class="form-control {% if errors.get('password') %}is-invalid{% endif %}"
-                        id="password"
-                        name="password"
-                        minlength="6"
-                        autocomplete="new-password"
-                        required
-                    >
-
-                    {% if errors.get('password') %}
-                        <div class="invalid-feedback">
-                            {{ errors.get('password') }}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="mb-3">
-                    <label for="confirm_password" class="form-label">
-                        Confirm Password
-                    </label>
-
-                    <input
-                        type="password"
-                        class="form-control {% if errors.get('confirm_password') %}is-invalid{% endif %}"
-                        id="confirm_password"
-                        name="confirm_password"
-                        minlength="6"
-                        autocomplete="new-password"
-                        required
-                    >
-
-                    {% if errors.get('confirm_password') %}
-                        <div class="invalid-feedback">
-                            {{ errors.get('confirm_password') }}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <button type="submit" class="signup-btn">
-                    Create Account
-                </button>
-
-            </form>
-
-            <p class="login-text">
-                Already have an account?
-                <a href="{{ url_for('login') }}">Login</a>
-            </p>
-
-        </div>
-    </main>
-
-    <footer class="footer">
-        SpendWise Student — Personal Finance &amp; Budget Tracker
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+```
