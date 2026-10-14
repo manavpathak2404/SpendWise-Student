@@ -3,562 +3,159 @@
 {% block title %}Dashboard | SpendWise Student{% endblock %}
 
 {% block content %}
-
-<style>
-    .sw-dashboard {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 28px 18px 40px;
-        color: #172033;
-    }
-
-    .sw-heading {
-        font-weight: 750;
-        letter-spacing: -0.7px;
-        margin-bottom: 7px;
-    }
-
-    .sw-muted {
-        color: #7c879a;
-        font-size: 14px;
-    }
-
-    .sw-card {
-        height: 100%;
-        padding: 23px;
-        border: 1px solid #e8edf4;
-        border-radius: 18px;
-        background: #fff;
-        box-shadow: 0 5px 20px rgba(25, 42, 70, 0.045);
-    }
-
-    .sw-summary-label {
-        color: #7c879a;
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 12px;
-    }
-
-    .sw-summary-amount {
-        color: #172033;
-        font-size: clamp(22px, 2vw, 31px);
-        font-weight: 750;
-        letter-spacing: -0.8px;
-        overflow-wrap: anywhere;
-    }
-
-    .sw-icon {
-        display: flex;
-        width: 46px;
-        height: 46px;
-        align-items: center;
-        justify-content: center;
-        border-radius: 14px;
-        font-size: 23px;
-        margin-bottom: 22px;
-    }
-
-    .sw-purple {
-        color: #6258df;
-        background: #efedff;
-    }
-
-    .sw-green {
-        color: #16875e;
-        background: #e5f8ef;
-    }
-
-    .sw-red {
-        color: #d7475d;
-        background: #fff0f1;
-    }
-
-    .sw-panel-title {
-        font-size: 18px;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-
-    .sw-chart-box {
-        position: relative;
-        width: 100%;
-        height: 285px;
-    }
-
-    .sw-table {
-        margin-bottom: 0;
-        vertical-align: middle;
-    }
-
-    .sw-table thead th {
-        padding: 14px;
-        background: #f8f9fc;
-        border-bottom: 1px solid #e9edf4;
-        color: #778297;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: .4px;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
-
-    .sw-table tbody td {
-        padding: 15px 14px;
-        border-bottom: 1px solid #f0f2f6;
-        color: #354056;
-    }
-
-    .sw-table tbody tr:last-child td {
-        border-bottom: 0;
-    }
-
-    .sw-tx-title {
-        font-weight: 650;
-        color: #202b40;
-    }
-
-    .sw-tx-category {
-        margin-top: 4px;
-        color: #8993a4;
-        font-size: 12px;
-    }
-
-    .sw-badge {
-        display: inline-block;
-        padding: 6px 10px;
-        border-radius: 30px;
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    .sw-income-badge {
-        color: #13845c;
-        background: #e5f8ef;
-    }
-
-    .sw-expense-badge {
-        color: #d7475d;
-        background: #fff0f1;
-    }
-
-    .sw-income-amount {
-        color: #13845c !important;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-    .sw-expense-amount {
-        color: #d7475d !important;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-    .sw-primary-btn {
-        padding: 10px 16px;
-        border: 1px solid #6258df;
-        border-radius: 11px;
-        background: #6258df;
-        color: #fff;
-        font-weight: 650;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .sw-primary-btn:hover {
-        color: #fff;
-        background: #5046c7;
-        border-color: #5046c7;
-    }
-
-    .sw-secondary-btn {
-        padding: 10px 16px;
-        border: 1px solid #dfe4ed;
-        border-radius: 11px;
-        background: #fff;
-        color: #354056;
-        font-weight: 650;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .sw-secondary-btn:hover {
-        color: #202b40;
-        background: #f7f8fc;
-    }
-
-    .sw-empty {
-        padding: 35px 15px;
-        text-align: center;
-        color: #8791a2;
-    }
-
-    .sw-empty-icon {
-        font-size: 35px;
-        margin-bottom: 10px;
-    }
-
-    @media (max-width: 767px) {
-        .sw-dashboard {
-            padding: 20px 12px 30px;
-        }
-
-        .sw-card {
-            padding: 17px;
-        }
-
-        .sw-chart-box {
-            height: 245px;
-        }
-
-        .sw-heading {
-            font-size: 25px;
-        }
-    }
-</style>
-
-<div class="sw-dashboard">
-
-    <!-- Heading -->
+<div class="container py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h2 class="sw-heading">My Dashboard</h2>
-            <p class="sw-muted mb-0">
-                Track your money. Understand your spending. Plan smarter.
-            </p>
+            <p class="text-uppercase small fw-semibold text-primary mb-1">Your financial overview</p>
+            <h1 class="h2 fw-bold mb-1">Welcome back, {{ session.get('user_name', 'Student') }}!</h1>
+            <p class="text-muted mb-0">A clear view of your money, all in one place.</p>
         </div>
-
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{{ url_for('add_transaction') }}" class="sw-primary-btn">
-                + Add Transaction
-            </a>
-
-            <a href="{{ url_for('all_transactions') }}" class="sw-secondary-btn">
-                View Transactions
-            </a>
-        </div>
+        <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Add transaction
+        </a>
     </div>
 
-    <!-- Summary cards -->
     <div class="row g-3 mb-4">
-
-        <div class="col-12 col-md-4">
-            <div class="sw-card">
-                <div class="sw-icon sw-purple">₹</div>
-                <div class="sw-summary-label">Total Balance</div>
-                <div class="sw-summary-amount">
-                    {{ total_balance|inr }}
-                </div>
-                <p class="sw-muted mt-2 mb-0">Income minus expenses</p>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-            <div class="sw-card">
-                <div class="sw-icon sw-green">↗</div>
-                <div class="sw-summary-label">Total Income</div>
-                <div class="sw-summary-amount">
-                    {{ total_income|inr }}
-                </div>
-                <p class="sw-muted mt-2 mb-0">Money received</p>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-            <div class="sw-card">
-                <div class="sw-icon sw-red">↘</div>
-                <div class="sw-summary-label">Total Expenses</div>
-                <div class="sw-summary-amount">
-                    {{ total_expense|inr }}
-                </div>
-                <p class="sw-muted mt-2 mb-0">Money spent</p>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Charts -->
-    <div class="row g-3 mb-4">
-
-        <div class="col-12 col-lg-7">
-            <div class="sw-card">
-                <h5 class="sw-panel-title">Income vs Expenses</h5>
-                <p class="sw-muted mb-4">Monthly financial activity</p>
-
-                <div class="sw-chart-box">
-                    <canvas id="incomeExpenseChart"></canvas>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="text-muted small fw-semibold">Total balance</span>
+                        <span class="rounded-3 bg-primary-subtle text-primary p-2"><i class="bi bi-wallet2"></i></span>
+                    </div>
+                    <div class="h3 fw-bold mb-1">{{ balance|currency }}</div>
+                    <p class="small text-muted mb-0">Income minus expenses</p>
                 </div>
             </div>
         </div>
-
-        <div class="col-12 col-lg-5">
-            <div class="sw-card">
-                <h5 class="sw-panel-title">Spending Breakdown</h5>
-                <p class="sw-muted mb-4">Your expenses by category</p>
-
-                <div class="sw-chart-box" id="categoryChartBox">
-                    <canvas id="categoryChart"></canvas>
-                </div>
-
-                <div id="categoryEmptyMessage" class="sw-empty d-none">
-                    <div class="sw-empty-icon">📊</div>
-                    <p class="mb-0">No expense data available yet.</p>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="text-muted small fw-semibold">Total income</span>
+                        <span class="rounded-3 bg-success-subtle text-success p-2"><i class="bi bi-arrow-down-left-circle"></i></span>
+                    </div>
+                    <div class="h3 fw-bold text-success mb-1">{{ total_income|currency }}</div>
+                    <p class="small text-muted mb-0">Money received</p>
                 </div>
             </div>
         </div>
-
-    </div>
-
-    <!-- Recent transactions -->
-    <div class="sw-card">
-
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-            <div>
-                <h5 class="sw-panel-title">Recent Transactions</h5>
-                <p class="sw-muted mb-0">Your latest financial activity</p>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="text-muted small fw-semibold">Total expenses</span>
+                        <span class="rounded-3 bg-danger-subtle text-danger p-2"><i class="bi bi-arrow-up-right-circle"></i></span>
+                    </div>
+                    <div class="h3 fw-bold text-danger mb-1">{{ total_expenses|currency }}</div>
+                    <p class="small text-muted mb-0">Money spent</p>
+                </div>
             </div>
-
-            <a href="{{ url_for('all_transactions') }}"
-               class="text-decoration-none fw-semibold">
-                View all →
-            </a>
         </div>
-
-        <div class="table-responsive">
-            <table class="table sw-table">
-
-                <thead>
-                    <tr>
-                        <th>Transaction</th>
-                        <th>Type</th>
-                        <th>Date</th>
-                        <th class="text-end">Amount</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for transaction in recent_transactions %}
-                    <tr>
-                        <td>
-                            <div class="sw-tx-title">
-                                {{ transaction.title }}
-                            </div>
-                            <div class="sw-tx-category">
-                                {{ transaction.category }}
-                            </div>
-                        </td>
-
-                        <td>
-                            {% if transaction.type == 'income' %}
-                                <span class="sw-badge sw-income-badge">Income</span>
-                            {% else %}
-                                <span class="sw-badge sw-expense-badge">Expense</span>
-                            {% endif %}
-                        </td>
-
-                        <td class="text-nowrap">
-                            {{ transaction.date }}
-                        </td>
-
-                        <td class="text-end
-                            {% if transaction.type == 'income' %}
-                                sw-income-amount
-                            {% else %}
-                                sw-expense-amount
-                            {% endif %}">
-                            {% if transaction.type == 'income' %}+{% else %}-{% endif %}{{ transaction.amount|inr }}
-                        </td>
-                    </tr>
-
-                    {% else %}
-                    <tr>
-                        <td colspan="4">
-                            <div class="sw-empty">
-                                <div class="sw-empty-icon">💳</div>
-                                <h6 class="fw-bold">No transactions yet</h6>
-                                <p>Add your first transaction to get started.</p>
-                                <a href="{{ url_for('add_transaction') }}"
-                                   class="sw-primary-btn">
-                                    + Add Transaction
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-
-            </table>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="text-muted small fw-semibold">Transactions</span>
+                        <span class="rounded-3 bg-info-subtle text-info p-2"><i class="bi bi-receipt"></i></span>
+                    </div>
+                    <div class="h3 fw-bold mb-1">{{ transaction_count }}</div>
+                    <p class="small text-muted mb-0">Recorded so far</p>
+                </div>
+            </div>
         </div>
     </div>
 
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-xl-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-md-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div>
+                            <h2 class="h5 fw-bold mb-1">Income vs expenses</h2>
+                            <p class="small text-muted mb-0">Compare your monthly money flow.</p>
+                        </div>
+                        <span class="badge text-bg-light">Monthly overview</span>
+                    </div>
+                    <div style="position: relative; min-height: 280px;">
+                        <canvas id="incomeExpenseChart" aria-label="Monthly income and expenses chart" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3 p-md-4">
+                    <div class="mb-3">
+                        <h2 class="h5 fw-bold mb-1">Expense categories</h2>
+                        <p class="small text-muted mb-0">See where your spending goes.</p>
+                    </div>
+                    <div style="position: relative; min-height: 280px;">
+                        <canvas id="categoryChart" aria-label="Expense by category chart" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 p-3 p-md-4 border-bottom">
+                <div>
+                    <h2 class="h5 fw-bold mb-1">Recent transactions</h2>
+                    <p class="small text-muted mb-0">Your latest recorded activity.</p>
+                </div>
+                <a href="{{ url_for('all_transactions') }}" class="btn btn-sm btn-outline-primary">
+                    View all <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            {% if recent_transactions %}
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3 ps-md-4">Transaction</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th class="text-end pe-3 pe-md-4">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in recent_transactions %}
+                        <tr>
+                            <td class="ps-3 ps-md-4">
+                                <div class="fw-semibold">{{ transaction.title }}</div>
+                                <span class="badge rounded-pill {% if transaction.type == 'income' %}text-bg-success{% else %}text-bg-danger{% endif %}">
+                                    {{ transaction.type|title }}
+                                </span>
+                            </td>
+                            <td>{{ transaction.category }}</td>
+                            <td class="text-muted">{{ transaction.date }}</td>
+                            <td class="text-end fw-semibold pe-3 pe-md-4 {% if transaction.type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                                {% if transaction.type == 'income' %}+{% else %}−{% endif %}{{ transaction.amount|currency }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 px-3">
+                <div class="display-5 text-muted mb-3"><i class="bi bi-journal-plus"></i></div>
+                <h3 class="h5 fw-bold">Start tracking your money</h3>
+                <p class="text-muted mb-3">Add your first transaction to see your dashboard come to life.</p>
+                <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Add first transaction
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
+{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const moneyFormat = new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-        maximumFractionDigits: 2
-    });
-
-    const compactFormat = new Intl.NumberFormat("en-IN", {
-        notation: "compact",
-        maximumFractionDigits: 1
-    });
-
-    const colors = [
-        "#6258df",
-        "#22a879",
-        "#f0a33a",
-        "#e45c72",
-        "#3995db",
-        "#9a70d6",
-        "#38b9b2"
-    ];
-
-    fetch("{{ url_for('chart_data') }}")
-        .then(function (response) {
-            if (!response.ok) {
-                throw new Error("Could not load chart data");
-            }
-            return response.json();
-        })
-        .then(function (data) {
-
-            const monthly = data.monthly || {};
-            const categories = data.categories || {};
-
-            // Monthly income and expenses
-            new Chart(document.getElementById("incomeExpenseChart"), {
-                type: "bar",
-
-                data: {
-                    labels: monthly.labels || [],
-
-                    datasets: [
-                        {
-                            label: "Income",
-                            data: monthly.income || [],
-                            backgroundColor: "#22a879",
-                            borderRadius: 5,
-                            maxBarThickness: 28
-                        },
-                        {
-                            label: "Expenses",
-                            data: monthly.expense || [],
-                            backgroundColor: "#e45c72",
-                            borderRadius: 5,
-                            maxBarThickness: 28
-                        }
-                    ]
-                },
-
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-
-                    plugins: {
-                        legend: {
-                            position: "bottom",
-                            labels: {
-                                usePointStyle: true,
-                                padding: 18
-                            }
-                        },
-
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return context.dataset.label + ": " +
-                                        moneyFormat.format(context.parsed.y || 0);
-                                }
-                            }
-                        }
-                    },
-
-                    scales: {
-                        x: {
-                            grid: { display: false }
-                        },
-
-                        y: {
-                            beginAtZero: true,
-
-                            ticks: {
-                                callback: function (value) {
-                                    return "₹" + compactFormat.format(value);
-                                }
-                            },
-
-                            grid: {
-                                color: "#edf0f5"
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Expense category chart
-            const categoryValues = categories.data || [];
-            const hasExpenses = categoryValues.some(function (value) {
-                return Number(value) > 0;
-            });
-
-            if (hasExpenses) {
-
-                new Chart(document.getElementById("categoryChart"), {
-                    type: "doughnut",
-
-                    data: {
-                        labels: categories.labels || [],
-
-                        datasets: [{
-                            data: categoryValues,
-                            backgroundColor: colors,
-                            borderColor: "#ffffff",
-                            borderWidth: 3,
-                            hoverOffset: 6
-                        }]
-                    },
-
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: "67%",
-
-                        plugins: {
-                            legend: {
-                                position: "bottom",
-                                labels: {
-                                    usePointStyle: true,
-                                    padding: 14
-                                }
-                            },
-
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        return context.label + ": " +
-                                            moneyFormat.format(context.parsed || 0);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-
-            } else {
-                document.getElementById("categoryChartBox").classList.add("d-none");
-                document.getElementById("categoryEmptyMessage").classList.remove("d-none");
-            }
-        })
-        .catch(function (error) {
-            console.error("SpendWise chart error:", error);
-        });
-
-});
-</script>
-
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 {% endblock %}
