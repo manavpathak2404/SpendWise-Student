@@ -3,8 +3,9 @@
 
 {% block content %}
 <div class="container py-4">
+
     <div class="mb-4">
-        <h2>Savings Goals</h2>
+        <h2 class="fw-bold">Savings Goals</h2>
         <p class="text-muted">Set a target and track your savings progress.</p>
     </div>
 
@@ -16,52 +17,134 @@
         </div>
     {% endif %}
 
-    <div class="card p-4 mb-4">
-        <h5 class="mb-3">Create a Savings Goal</h5>
+    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4">
+        <h5 class="fw-bold mb-3">Create a Savings Goal</h5>
+
         <form method="POST" action="{{ url_for('savings_goals') }}">
             <div class="row g-3">
+
                 <div class="col-md-4">
-                    <label class="form-label">Goal Name</label>
-                    <input class="form-control" type="text" name="name" required maxlength="100">
+                    <label for="goalName" class="form-label">Goal Name</label>
+                    <input
+                        id="goalName"
+                        class="form-control"
+                        type="text"
+                        name="name"
+                        maxlength="100"
+                        required
+                        placeholder="e.g. New Laptop"
+                        value="{{ values.get('name', '') }}"
+                    >
                 </div>
+
                 <div class="col-md-4">
-                    <label class="form-label">Target Amount (₹)</label>
-                    <input class="form-control" type="number" name="target_amount" min="1" step="0.01" required>
+                    <label for="targetAmount" class="form-label">Target Amount (₹)</label>
+                    <input
+                        id="targetAmount"
+                        class="form-control"
+                        type="number"
+                        name="target_amount"
+                        min="1"
+                        step="0.01"
+                        required
+                        placeholder="e.g. 50000"
+                        value="{{ values.get('target_amount', '') }}"
+                    >
                 </div>
+
                 <div class="col-md-4">
-                    <label class="form-label">Saved Amount (₹)</label>
-                    <input class="form-control" type="number" name="saved_amount" min="0" step="0.01" value="0">
+                    <label for="savedAmount" class="form-label">Already Saved (₹)</label>
+                    <input
+                        id="savedAmount"
+                        class="form-control"
+                        type="number"
+                        name="saved_amount"
+                        min="0"
+                        step="0.01"
+                        value="{{ values.get('saved_amount', '0') }}"
+                    >
                 </div>
+
             </div>
-            <button class="btn btn-primary mt-3" type="submit">Save Goal</button>
+
+            <button class="btn btn-primary mt-4" type="submit">
+                + Create Savings Goal
+            </button>
         </form>
     </div>
 
-    <div class="card p-4">
-        <h5 class="mb-3">Your Goals</h5>
+    <div class="card shadow-sm border-0 rounded-4 p-4">
+        <h5 class="fw-bold mb-3">Your Savings Goals</h5>
+
         {% if goals %}
             <div class="row g-3">
+
                 {% for goal in goals %}
+                    {% set target = goal.target_amount|default(goal.target, true)|default(0, true)|float %}
+                    {% set saved = goal.saved_amount|default(goal.saved, true)|default(0, true)|float %}
+                    {% set progress = (saved / target * 100) if target > 0 else 0 %}
+
                     <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <h5>{{ goal.name }}</h5>
-                            <p class="mb-1">Target: {{ goal.target_amount|default(goal.target)|default(0)|currency }}</p>
-                            <p class="mb-2">Saved: {{ goal.saved_amount|default(goal.saved)|default(0)|currency }}</p>
-                            {% set target = goal.target_amount|default(goal.target)|default(0)|float %}
-                            {% set saved = goal.saved_amount|default(goal.saved)|default(0)|float %}
-                            {% set progress = (saved / target * 100) if target > 0 else 0 %}
-                            <div class="progress" role="progressbar" aria-valuenow="{{ progress|round|int }}" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar" style="width: {{ [progress, 100]|min }}%">
-                                    {{ progress|round|int }}%
-                                </div>
+                        <div class="border rounded-4 p-4 h-100">
+
+                            <h5 class="fw-bold mb-3">
+                                {{ goal.name|default('Savings Goal') }}
+                            </h5>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Target Amount</span>
+                                <strong>{{ target|currency }}</strong>
                             </div>
+
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted">Amount Saved</span>
+                                <strong>{{ saved|currency }}</strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between small mb-2">
+                                <span>Progress</span>
+                                <strong>{{ progress|round|int }}%</strong>
+                            </div>
+
+                            <div
+                                class="progress"
+                                style="height: 12px;"
+                                role="progressbar"
+                                aria-valuenow="{{ [progress, 100]|min|round|int }}"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                            >
+                                <div
+                                    class="progress-bar {% if progress >= 100 %}bg-success{% endif %}"
+                                    style="width: {{ [progress, 100]|min }}%;"
+                                ></div>
+                            </div>
+
+                            {% if target > 0 and saved >= target %}
+                                <div class="alert alert-success mt-3 mb-0 py-2">
+                                    Goal achieved!
+                                </div>
+                            {% else %}
+                                <p class="text-muted small mt-3 mb-0">
+                                    Remaining:
+                                    {{ [target - saved, 0]|max|currency }}
+                                </p>
+                            {% endif %}
+
                         </div>
                     </div>
                 {% endfor %}
+
             </div>
         {% else %}
-            <p class="text-muted mb-0">No savings goals yet. Create your first goal above.</p>
+            <div class="text-center py-4">
+                <h5>No savings goals yet</h5>
+                <p class="text-muted mb-0">
+                    Create your first goal using the form above.
+                </p>
+            </div>
         {% endif %}
     </div>
+
 </div>
 {% endblock %}
