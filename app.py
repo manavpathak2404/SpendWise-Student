@@ -23,7 +23,12 @@ from db import get_db_connection, init_db
 
 
 # Initialize Flask BEFORE registering filters and routes.
-app = Flask(__name__)
+@app.template_filter("currency")
+def currency_filter(value):
+    try:
+        return "₹{:,.2f}".format(float(value or 0))
+    except (ValueError, TypeError):
+        return "₹0.00"
 app.secret_key = os.environ.get(
     "SECRET_KEY",
     "change-this-secret-key-before-production"
