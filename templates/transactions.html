@@ -63,10 +63,10 @@
                     <div class="col-12 col-md-6 col-lg-3">
                         <label for="sort" class="form-label">Sort by</label>
                         <select class="form-select" id="sort" name="sort">
-                            <option value="newest" {% if current_filters.sort == 'newest' %}selected{% endif %}>Newest first</option>
-                            <option value="oldest" {% if current_filters.sort == 'oldest' %}selected{% endif %}>Oldest first</option>
-                            <option value="amount_high" {% if current_filters.sort == 'amount_high' %}selected{% endif %}>Amount: high to low</option>
-                            <option value="amount_low" {% if current_filters.sort == 'amount_low' %}selected{% endif %}>Amount: low to high</option>
+                            <option value="date_desc" {% if current_filters.sort == 'date_desc' %}selected{% endif %}>Newest first</option>
+<option value="date_asc" {% if current_filters.sort == 'date_asc' %}selected{% endif %}>Oldest first</option>
+<option value="amount_desc" {% if current_filters.sort == 'amount_desc' %}selected{% endif %}>Amount: high to low</option>
+<option value="amount_asc" {% if current_filters.sort == 'amount_asc' %}selected{% endif %}>Amount: low to high</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-6 col-lg-9 d-flex align-items-end gap-2">
