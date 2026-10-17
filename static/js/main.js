@@ -83,7 +83,7 @@ function confirmDelete(id, title) {
     const modalElement = document.getElementById("deleteConfirmModal");
 
     if (form) {
-        form.action = `/delete-transaction/${id}`;
+        form.action = `/delete/${id}`;
     }
 
     if (titleElement) {
