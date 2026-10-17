@@ -3,7 +3,7 @@
 (() => {
     "use strict";
 
-    const formatMoney = (value) => {
+    const money = (value) => {
         return new Intl.NumberFormat("en-IN", {
             style: "currency",
             currency: "INR",
@@ -11,14 +11,15 @@
         }).format(Number(value) || 0);
     };
 
-    const showMessage = (canvas, message) => {
+    const showChartError = (canvas, message) => {
         if (!canvas) return;
 
         const parent = canvas.parentElement;
 
         if (parent) {
             parent.innerHTML = `
-                <div class="text-center text-muted p-4">
+                <div class="d-flex align-items-center justify-content-center
+                            text-muted text-center h-100 p-4">
                     ${message}
                 </div>
             `;
@@ -32,125 +33,152 @@
         const categoryCanvas =
             document.getElementById("categoryChart");
 
-        if (!incomeExpenseCanvas && !categoryCanvas) return;
+        if (!incomeExpenseCanvas && !categoryCanvas) {
+            return;
+        }
 
         if (typeof Chart === "undefined") {
-            showMessage(
+            showChartError(
                 incomeExpenseCanvas,
-                "Charts could not load. Please refresh the page."
+                "Chart library could not load. Please refresh the page."
             );
 
-            showMessage(
+            showChartError(
                 categoryCanvas,
-                "Charts could not load. Please refresh the page."
+                "Chart library could not load. Please refresh the page."
             );
 
             return;
         }
 
         try {
-            const response = await fetch("/chart-data", {
+            const response = await fetch("/api/chart-data", {
+                method: "GET",
                 headers: {
-                    Accept: "application/json"
-                }
+                    "Accept": "application/json"
+                },
+                cache: "no-store"
             });
 
             if (!response.ok) {
-                throw new Error("Failed to load chart data.");
+                throw new Error(
+                    `Chart API failed with status ${response.status}`
+                );
             }
 
             const data = await response.json();
 
-            /* Income and Expenses Chart */
-
+            // Income vs Expenses chart
             if (incomeExpenseCanvas) {
-                const monthly = Array.isArray(data.monthly)
-                    ? data.monthly
+                const monthly = data.monthly || {};
+
+                const labels = Array.isArray(monthly.labels)
+                    ? monthly.labels
                     : [];
 
-                if (monthly.length === 0) {
-                    showMessage(
-                        incomeExpenseCanvas,
-                        "Add transactions to see your income and expenses."
-                    );
-                } else {
-                    new Chart(incomeExpenseCanvas, {
-                        type: "line",
+                const income = Array.isArray(monthly.income)
+                    ? monthly.income
+                    : [];
 
-                        data: {
-                            labels: monthly.map(item => item.month),
+                const expenses = Array.isArray(monthly.expense)
+                    ? monthly.expense
+                    : [];
 
-                            datasets: [
-                                {
-                                    label: "Income",
-                                    data: monthly.map(
-                                        item => Number(item.income) || 0
-                                    ),
-                                    borderColor: "#16a34a",
-                                    backgroundColor: "rgba(22,163,74,0.12)",
-                                    fill: true,
-                                    tension: 0.35,
-                                    borderWidth: 2.5
-                                },
-                                {
-                                    label: "Expenses",
-                                    data: monthly.map(
-                                        item => Number(item.expense) || 0
-                                    ),
-                                    borderColor: "#dc2626",
-                                    backgroundColor: "rgba(220,38,38,0.08)",
-                                    fill: true,
-                                    tension: 0.35,
-                                    borderWidth: 2.5
-                                }
-                            ]
+                new Chart(incomeExpenseCanvas, {
+                    type: "bar",
+
+                    data: {
+                        labels: labels,
+
+                        datasets: [
+                            {
+                                label: "Income",
+                                data: income,
+                                backgroundColor: "#16a34a",
+                                borderColor: "#15803d",
+                                borderWidth: 1,
+                                borderRadius: 6
+                            },
+                            {
+                                label: "Expenses",
+                                data: expenses,
+                                backgroundColor: "#ef4444",
+                                borderColor: "#dc2626",
+                                borderWidth: 1,
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+
+                        interaction: {
+                            mode: "index",
+                            intersect: false
                         },
 
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: "bottom",
 
-                            interaction: {
-                                mode: "index",
-                                intersect: false
-                            },
-
-                            plugins: {
-                                legend: {
-                                    position: "bottom"
-                                },
-
-                                tooltip: {
-                                    callbacks: {
-                                        label: context =>
-                                            `${context.dataset.label}: ${formatMoney(context.parsed.y)}`
-                                    }
+                                labels: {
+                                    usePointStyle: true,
+                                    boxWidth: 8,
+                                    padding: 16
                                 }
                             },
 
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-
-                                    ticks: {
-                                        callback: value => formatMoney(value)
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => {
+                                        return `${context.dataset.label}: ${money(context.parsed.y)}`;
                                     }
                                 }
                             }
+                        },
+
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+
+                                ticks: {
+                                    callback: (value) => money(value)
+                                },
+
+                                grid: {
+                                    color: "rgba(148, 163, 184, 0.18)"
+                                }
+                            },
+
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
                         }
-                    });
-                }
+                    }
+                });
             }
 
-            /* Expense Categories Chart */
-
+            // Expense Categories chart
             if (categoryCanvas) {
-                const categories = Array.isArray(data.categories)
-                    ? data.categories
+                const categories = data.categories || {};
+
+                const categoryLabels = Array.isArray(categories.labels)
+                    ? categories.labels
                     : [];
 
-                if (categories.length === 0) {
-                    showMessage(
+                const categoryValues = Array.isArray(categories.data)
+                    ? categories.data
+                    : [];
+
+                if (
+                    categoryLabels.length === 0 ||
+                    categoryValues.length === 0
+                ) {
+                    showChartError(
                         categoryCanvas,
                         "Add some expenses to see your category breakdown."
                     );
@@ -159,15 +187,13 @@
                         type: "doughnut",
 
                         data: {
-                            labels: categories.map(
-                                item => item.category
-                            ),
+                            labels: categoryLabels,
 
                             datasets: [
                                 {
-                                    data: categories.map(
-                                        item => Number(item.total) || 0
-                                    ),
+                                    label: "Expenses",
+
+                                    data: categoryValues,
 
                                     backgroundColor: [
                                         "#4f46e5",
@@ -180,8 +206,8 @@
                                         "#64748b"
                                     ],
 
-                                    borderWidth: 3,
                                     borderColor: "#ffffff",
+                                    borderWidth: 3,
                                     hoverOffset: 7
                                 }
                             ]
@@ -190,17 +216,25 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+
                             cutout: "63%",
 
                             plugins: {
                                 legend: {
-                                    position: "bottom"
+                                    position: "bottom",
+
+                                    labels: {
+                                        usePointStyle: true,
+                                        boxWidth: 8,
+                                        padding: 16
+                                    }
                                 },
 
                                 tooltip: {
                                     callbacks: {
-                                        label: context =>
-                                            `${context.label}: ${formatMoney(context.parsed)}`
+                                        label: (context) => {
+                                            return `${context.label}: ${money(context.parsed)}`;
+                                        }
                                     }
                                 }
                             }
@@ -211,12 +245,12 @@
         } catch (error) {
             console.error("Dashboard chart error:", error);
 
-            showMessage(
+            showChartError(
                 incomeExpenseCanvas,
                 "Unable to load chart data. Please refresh the page."
             );
 
-            showMessage(
+            showChartError(
                 categoryCanvas,
                 "Unable to load chart data. Please refresh the page."
             );
