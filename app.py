@@ -308,6 +308,7 @@ def dashboard():
     uid = session["user_id"]
 
     totals = {"income": 0.0, "expense": 0.0}
+    transaction_count = 0
     recent = []
 
     conn = db_connection_or_redirect()
@@ -316,19 +317,38 @@ def dashboard():
         try:
             cur = conn.cursor(dictionary=True)
 
+            # Calculate income and expenses.
             cur.execute(
                 """
-                SELECT type, COALESCE(SUM(amount), 0) AS total
+                SELECT LOWER(TRIM(type)) AS type,
+                       COALESCE(SUM(amount), 0) AS total
                 FROM transactions
                 WHERE user_id=%s
-                GROUP BY type
+                GROUP BY LOWER(TRIM(type))
                 """,
                 (uid,)
             )
 
             for row in cur.fetchall():
-                totals[row["type"]] = float(row["total"])
+                tx_type = row["type"]
 
+                if tx_type in totals:
+                    totals[tx_type] = float(row["total"] or 0)
+
+            # Count all transactions belonging to this user.
+            cur.execute(
+                """
+                SELECT COUNT(*) AS total
+                FROM transactions
+                WHERE user_id=%s
+                """,
+                (uid,)
+            )
+
+            count_row = cur.fetchone()
+            transaction_count = int(count_row["total"] or 0)
+
+            # Load the latest 10 transactions.
             cur.execute(
                 """
                 SELECT id, title, amount, type, category, date, created_at
@@ -359,7 +379,9 @@ def dashboard():
         "dashboard.html",
         total_income=income,
         total_expense=expense,
+        total_expenses=expense,
         total_balance=income - expense,
+        transaction_count=transaction_count,
         recent_transactions=recent,
         now=datetime.now()
     )
@@ -879,7 +901,7 @@ def chart_data():
                 """
                 SELECT category, SUM(amount) AS total
                 FROM transactions
-                WHERE user_id=%s AND type='expense'
+                WHERE user_id=%s AND LOWER(TRIM(type))='expense'
                 GROUP BY category
                 ORDER BY total DESC
                 """,
@@ -898,10 +920,11 @@ def chart_data():
             cur.execute(
                 """
                 SELECT DATE_FORMAT(date, '%%Y-%%m') AS ym,
-                       type, SUM(amount) AS total
+                       LOWER(TRIM(type)) AS type,
+                       SUM(amount) AS total
                 FROM transactions
                 WHERE user_id=%s AND date BETWEEN %s AND %s
-                GROUP BY ym, type
+                GROUP BY ym, LOWER(TRIM(type))
                 """,
                 (uid, start, end)
             )
@@ -916,7 +939,7 @@ def chart_data():
 
                     if row["type"] == "income":
                         income[i] = float(row["total"])
-                    else:
+                    elif row["type"] == "expense":
                         expense[i] = float(row["total"])
 
         except Exception as exc:
@@ -1109,7 +1132,6 @@ def savings_goals():
     values = {}
 
     if request.method == "POST":
-        # Match the form field names in goals.html.
         title = request.form.get(
             "name", request.form.get("title", "")
         ).strip()
