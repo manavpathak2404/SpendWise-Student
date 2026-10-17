@@ -309,6 +309,7 @@ def dashboard():
 
     totals = {"income": 0.0, "expense": 0.0}
     recent = []
+    transaction_count = 0
 
     conn = db_connection_or_redirect()
 
@@ -327,7 +328,16 @@ def dashboard():
             )
 
             for row in cur.fetchall():
-                totals[row["type"]] = float(row["total"])
+                tx_type = (row["type"] or "").strip().lower()
+                if tx_type in totals:
+                    totals[tx_type] = float(row["total"] or 0)
+
+            cur.execute(
+                "SELECT COUNT(*) AS total FROM transactions WHERE user_id=%s",
+                (uid,)
+            )
+            count_row = cur.fetchone()
+            transaction_count = int(count_row["total"] or 0) if count_row else 0
 
             cur.execute(
                 """
@@ -360,6 +370,9 @@ def dashboard():
         total_income=income,
         total_expense=expense,
         total_balance=income - expense,
+        transaction_count=transaction_count,
+        total_transactions=transaction_count,
+        transactions_count=transaction_count,
         recent_transactions=recent,
         now=datetime.now()
     )
@@ -891,33 +904,47 @@ def chart_data():
                 categories["data"].append(float(row["total"]))
 
             start = months[0][2]
-            last_y, last_m, _ = months[-1]
-            last_day = calendar.monthrange(last_y, last_m)[1]
-            end = date(last_y, last_m, last_day)
+            today = date.today()
+            if today.month == 12:
+                end_exclusive = date(today.year + 1, 1, 1)
+            else:
+                end_exclusive = date(today.year, today.month + 1, 1)
 
             cur.execute(
                 """
-                SELECT DATE_FORMAT(date, '%%Y-%%m') AS ym,
-                       type, SUM(amount) AS total
+                SELECT YEAR(`date`) AS transaction_year,
+                       MONTH(`date`) AS transaction_month,
+                       LOWER(TRIM(type)) AS transaction_type,
+                       COALESCE(SUM(amount), 0) AS total
                 FROM transactions
-                WHERE user_id=%s AND date BETWEEN %s AND %s
-                GROUP BY ym, type
+                WHERE user_id=%s
+                  AND `date` >= %s
+                  AND `date` < %s
+                GROUP BY YEAR(`date`), MONTH(`date`), LOWER(TRIM(type))
                 """,
-                (uid, start, end)
+                (uid, start, end_exclusive)
             )
 
             index = {
-                key: i for i, key in enumerate(month_keys)
+                (y, m): i for i, (y, m, _) in enumerate(months)
             }
 
             for row in cur.fetchall():
-                if row["ym"] in index:
-                    i = index[row["ym"]]
+                key = (
+                    int(row["transaction_year"]),
+                    int(row["transaction_month"])
+                )
+                if key not in index:
+                    continue
 
-                    if row["type"] == "income":
-                        income[i] = float(row["total"])
-                    else:
-                        expense[i] = float(row["total"])
+                i = index[key]
+                tx_type = (row["transaction_type"] or "").strip().lower()
+                total = float(row["total"] or 0)
+
+                if tx_type == "income":
+                    income[i] += total
+                elif tx_type == "expense":
+                    expense[i] += total
 
         except Exception as exc:
             print("[chart data]", exc)
