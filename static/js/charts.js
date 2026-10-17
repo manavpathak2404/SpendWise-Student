@@ -4,11 +4,14 @@
     "use strict";
 
     const money = (value) => {
+        const amount = Number(value) || 0;
+
         return new Intl.NumberFormat("en-IN", {
             style: "currency",
             currency: "INR",
+            minimumFractionDigits: 0,
             maximumFractionDigits: 0
-        }).format(Number(value) || 0);
+        }).format(amount);
     };
 
     const showChartError = (canvas, message) => {
@@ -24,6 +27,15 @@
                 </div>
             `;
         }
+    };
+
+    const toNumbers = (values) => {
+        if (!Array.isArray(values)) return [];
+
+        return values.map((value) => {
+            const number = Number(value);
+            return Number.isFinite(number) ? number : 0;
+        });
     };
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -76,90 +88,95 @@
                     ? monthly.labels
                     : [];
 
-                const income = Array.isArray(monthly.income)
-                    ? monthly.income
-                    : [];
+                const income = toNumbers(monthly.income);
+                const expenses = toNumbers(monthly.expense);
 
-                const expenses = Array.isArray(monthly.expense)
-                    ? monthly.expense
-                    : [];
+                if (labels.length === 0) {
+                    showChartError(
+                        incomeExpenseCanvas,
+                        "No monthly data available yet."
+                    );
+                } else {
+                    new Chart(incomeExpenseCanvas, {
+                        type: "bar",
 
-                new Chart(incomeExpenseCanvas, {
-                    type: "bar",
+                        data: {
+                            labels: labels,
 
-                    data: {
-                        labels: labels,
-
-                        datasets: [
-                            {
-                                label: "Income",
-                                data: income,
-                                backgroundColor: "#16a34a",
-                                borderColor: "#15803d",
-                                borderWidth: 1,
-                                borderRadius: 6
-                            },
-                            {
-                                label: "Expenses",
-                                data: expenses,
-                                backgroundColor: "#ef4444",
-                                borderColor: "#dc2626",
-                                borderWidth: 1,
-                                borderRadius: 6
-                            }
-                        ]
-                    },
-
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-
-                        interaction: {
-                            mode: "index",
-                            intersect: false
+                            datasets: [
+                                {
+                                    label: "Income",
+                                    data: income,
+                                    backgroundColor: "#16a34a",
+                                    borderColor: "#15803d",
+                                    borderWidth: 1,
+                                    borderRadius: 6,
+                                    maxBarThickness: 42
+                                },
+                                {
+                                    label: "Expenses",
+                                    data: expenses,
+                                    backgroundColor: "#ef4444",
+                                    borderColor: "#dc2626",
+                                    borderWidth: 1,
+                                    borderRadius: 6,
+                                    maxBarThickness: 42
+                                }
+                            ]
                         },
 
-                        plugins: {
-                            legend: {
-                                position: "bottom",
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
 
-                                labels: {
-                                    usePointStyle: true,
-                                    boxWidth: 8,
-                                    padding: 16
+                            interaction: {
+                                mode: "index",
+                                intersect: false
+                            },
+
+                            plugins: {
+                                legend: {
+                                    position: "bottom",
+
+                                    labels: {
+                                        usePointStyle: true,
+                                        boxWidth: 8,
+                                        padding: 16
+                                    }
+                                },
+
+                                tooltip: {
+                                    callbacks: {
+                                        label: (context) =>
+                                            `${context.dataset.label}: ${money(context.parsed.y)}`
+                                    }
                                 }
                             },
 
-                            tooltip: {
-                                callbacks: {
-                                    label: (context) => {
-                                        return `${context.dataset.label}: ${money(context.parsed.y)}`;
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+
+                                    ticks: {
+                                        maxTicksLimit: 7,
+
+                                        callback: (value) => money(value)
+                                    },
+
+                                    grid: {
+                                        color: "rgba(148, 163, 184, 0.18)"
+                                    }
+                                },
+
+                                x: {
+                                    grid: {
+                                        display: false
                                     }
                                 }
                             }
-                        },
-
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-
-                                ticks: {
-                                    callback: (value) => money(value)
-                                },
-
-                                grid: {
-                                    color: "rgba(148, 163, 184, 0.18)"
-                                }
-                            },
-
-                            x: {
-                                grid: {
-                                    display: false
-                                }
-                            }
                         }
-                    }
-                });
+                    });
+                }
             }
 
             // Expense Categories chart
@@ -170,13 +187,12 @@
                     ? categories.labels
                     : [];
 
-                const categoryValues = Array.isArray(categories.data)
-                    ? categories.data
-                    : [];
+                const categoryValues = toNumbers(categories.data);
 
                 if (
                     categoryLabels.length === 0 ||
-                    categoryValues.length === 0
+                    categoryValues.length === 0 ||
+                    categoryValues.every((value) => value <= 0)
                 ) {
                     showChartError(
                         categoryCanvas,
@@ -192,7 +208,6 @@
                             datasets: [
                                 {
                                     label: "Expenses",
-
                                     data: categoryValues,
 
                                     backgroundColor: [
@@ -216,7 +231,6 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
-
                             cutout: "63%",
 
                             plugins: {
@@ -232,9 +246,8 @@
 
                                 tooltip: {
                                     callbacks: {
-                                        label: (context) => {
-                                            return `${context.label}: ${money(context.parsed)}`;
-                                        }
+                                        label: (context) =>
+                                            `${context.label}: ${money(context.parsed)}`
                                     }
                                 }
                             }
