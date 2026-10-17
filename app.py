@@ -533,8 +533,8 @@ def all_transactions():
         params.append(category)
 
     if search:
-        clauses.append("title LIKE %s")
-        params.append(f"%{search}%")
+        clauses.append("(title LIKE %s OR category LIKE %s)")
+        params.extend([f"%{search}%", f"%{search}%"])
 
     try:
         if start_date:
@@ -769,8 +769,8 @@ def export_transactions():
         params.append(category)
 
     if search:
-        clauses.append("title LIKE %s")
-        params.append(f"%{search}%")
+        clauses.append("(title LIKE %s OR category LIKE %s)")
+        params.extend([f"%{search}%", f"%{search}%"])
 
     try:
         if start_date:
