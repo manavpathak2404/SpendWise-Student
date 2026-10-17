@@ -5,63 +5,83 @@
 {% block content %}
 <div class="container-fluid py-4">
 
+    <!-- Dashboard Header -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Welcome back, {{ session.get('user_name', 'Student') }}!</h2>
+            <h2 class="fw-bold mb-1">
+                Welcome back, {{ session.get('user_name', 'Student') }}!
+            </h2>
             <p class="text-muted mb-0">Here's your financial overview.</p>
         </div>
 
-        <a href="{{ url_for('add_transaction') }}" class="btn btn-primary mt-3 mt-md-0">
+        <a href="{{ url_for('add_transaction') }}"
+           class="btn btn-primary mt-3 mt-md-0">
             + Add Transaction
         </a>
     </div>
 
+    <!-- Summary Cards -->
     <div class="row g-3 mb-4">
 
+        <!-- Total Balance -->
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <p class="text-muted mb-2">Total Balance</p>
-                    <h3 class="fw-bold mb-0">₹{{ "%.2f"|format(balance|default(0)|float) }}</h3>
+                    <h3 class="fw-bold mb-0">
+                        ₹{{ "%.2f"|format(total_balance|default(0)|float) }}
+                    </h3>
                 </div>
             </div>
         </div>
 
+        <!-- Total Income -->
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <p class="text-muted mb-2">Total Income</p>
-                    <h3 class="fw-bold text-success mb-0">₹{{ "%.2f"|format(total_income|default(0)|float) }}</h3>
+                    <h3 class="fw-bold text-success mb-0">
+                        ₹{{ "%.2f"|format(total_income|default(0)|float) }}
+                    </h3>
                 </div>
             </div>
         </div>
 
+        <!-- Total Expenses -->
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <p class="text-muted mb-2">Total Expenses</p>
-                    <h3 class="fw-bold text-danger mb-0">₹{{ "%.2f"|format(total_expenses|default(0)|float) }}</h3>
+                    <h3 class="fw-bold text-danger mb-0">
+                        ₹{{ "%.2f"|format(total_expense|default(0)|float) }}
+                    </h3>
                 </div>
             </div>
         </div>
 
+        <!-- Total Transactions -->
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <p class="text-muted mb-2">Transactions</p>
-                    <h3 class="fw-bold mb-0">{{ transaction_count|default(0) }}</h3>
+                    <h3 class="fw-bold mb-0">
+                        {{ transaction_count|default(0) }}
+                    </h3>
                 </div>
             </div>
         </div>
 
     </div>
 
+    <!-- Charts -->
     <div class="row g-4 mb-4">
 
+        <!-- Income vs Expenses Chart -->
         <div class="col-12 col-xl-8">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <h5 class="fw-bold mb-3">Income vs Expenses</h5>
+
                     <div style="height: 320px; position: relative;">
                         <canvas id="incomeExpenseChart"></canvas>
                     </div>
@@ -69,10 +89,12 @@
             </div>
         </div>
 
+        <!-- Expense Categories Chart -->
         <div class="col-12 col-xl-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <h5 class="fw-bold mb-3">Expense Categories</h5>
+
                     <div style="height: 320px; position: relative;">
                         <canvas id="categoryChart"></canvas>
                     </div>
@@ -82,18 +104,24 @@
 
     </div>
 
+    <!-- Recent Transactions -->
     <div class="card border-0 shadow-sm">
         <div class="card-body">
+
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0">Recent Transactions</h5>
-                <a href="{{ url_for('all_transactions') }}" class="btn btn-outline-primary btn-sm">
+
+                <a href="{{ url_for('all_transactions') }}"
+                   class="btn btn-outline-primary btn-sm">
                     View All
                 </a>
             </div>
 
             {% if recent_transactions %}
+
                 <div class="table-responsive">
                     <table class="table align-middle">
+
                         <thead>
                             <tr>
                                 <th>Title</th>
@@ -107,32 +135,49 @@
                         <tbody>
                             {% for transaction in recent_transactions %}
                             <tr>
+
                                 <td>{{ transaction.title }}</td>
+
                                 <td>{{ transaction.category }}</td>
+
                                 <td>{{ transaction.date }}</td>
+
                                 <td>
                                     {% if transaction.type == 'income' %}
-                                        <span class="badge bg-success">Income</span>
+                                        <span class="badge bg-success">
+                                            Income
+                                        </span>
                                     {% else %}
-                                        <span class="badge bg-danger">Expense</span>
+                                        <span class="badge bg-danger">
+                                            Expense
+                                        </span>
                                     {% endif %}
                                 </td>
+
                                 <td class="text-end fw-semibold">
                                     ₹{{ "%.2f"|format(transaction.amount|float) }}
                                 </td>
+
                             </tr>
                             {% endfor %}
                         </tbody>
+
                     </table>
                 </div>
+
             {% else %}
+
                 <div class="text-center py-5">
                     <p class="text-muted mb-3">No transactions yet.</p>
-                    <a href="{{ url_for('add_transaction') }}" class="btn btn-primary">
+
+                    <a href="{{ url_for('add_transaction') }}"
+                       class="btn btn-primary">
                         Add Your First Transaction
                     </a>
                 </div>
+
             {% endif %}
+
         </div>
     </div>
 
